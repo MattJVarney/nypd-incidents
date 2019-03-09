@@ -55,6 +55,11 @@ def setup():
 
 
     print "PROCESSING CSV INTO SQL LITE"
+
+    c.execute('SELECT count(*) count FROM collisions')
+    print c.fetchone()
+    exit;
+
     with open('data/NYPD_Motor_Vehicle_Collisions.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         count = 0;
@@ -72,4 +77,4 @@ def setup():
 
 
 if __name__ == '__main__':
-    setup()
+    setup();
