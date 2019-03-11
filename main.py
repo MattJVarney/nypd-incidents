@@ -10,6 +10,11 @@ import matplotlib.pyplot as plt
 
 from dateutil import parser
 
+
+# This function intializes the project for the first time.
+# It unzips the csv that was cloned into the project
+# It creates a SQL lite database with data/
+# It creates a table called `collisions` and it imports the data
 def setup():
     exists = os.path.isfile('data/NYPD_Motor_Vehicle_Collisions.csv')
     if not exists:
@@ -68,9 +73,11 @@ def setup():
             if (count == 1):
                 continue
 
+            #normalizes the data
             dt = parser.parse(row[0])
             row[0] = dt.strftime('%Y-%m-%d')
 
+            # normalizes the time
             dt = parser.parse(row[1]);
             row[1] = dt.strftime('%H:%M')
 
@@ -112,8 +119,6 @@ def generateCrashsByTimeOfDay():
         ''',
         conn)
 
-
-
     df.plot()
     plt.title('Crashes By Time Of Day')
     plt.xlabel("Time")
@@ -140,7 +145,7 @@ def generateDeathsByMonth():
 
 
 if __name__ == '__main__':
-#    setup()
+    setup()
     generateCrashsByMonth()
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
