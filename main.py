@@ -5,6 +5,10 @@ import os
 import tarfile
 import sqlite3
 import csv
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from dateutil import parser
 
 def setup():
     exists = os.path.isfile('data/NYPD_Motor_Vehicle_Collisions.csv')
@@ -15,9 +19,9 @@ def setup():
         tar.close()
 
     conn = sqlite3.connect('data/sqllite/collision.db')
-
     c = conn.cursor()
 
+    c.execute(''' DROP TABLE IF EXISTS collisions''')
     # Create table
     c.execute('''
         CREATE TABLE IF NOT EXISTS collisions (
@@ -56,25 +60,87 @@ def setup():
 
     print "PROCESSING CSV INTO SQL LITE"
 
-    c.execute('SELECT count(*) count FROM collisions')
-    print c.fetchone()
-    exit;
-
     with open('data/NYPD_Motor_Vehicle_Collisions.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         count = 0;
         for row in readCSV:
+            count += 1
+            if (count == 1):
+                continue
+
+            dt = parser.parse(row[0])
+            row[0] = dt.strftime('%Y-%m-%d')
+
+            dt = parser.parse(row[1]);
+            row[1] = dt.strftime('%H:%M')
+
             c.execute("INSERT INTO collisions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                       "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
             if (count % 10000 == 0):
-                print "processed " + str(count) + " records (out of 1.4M)"
+                print "processed " + str(count) + " records (out of 1.45M)"
                 conn.commit()
-            count += 1
-    # Save (commit) the changes
     conn.commit()
 
     conn.close()
 
+def generateCrashsByMonth():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            count(*) as count,
+            strftime("%m", date) as 'month' 
+        FROM collisions
+        GROUP BY strftime("%m", date)
+        ''',
+    conn)
+
+    df.plot()
+    plt.title('Crashes By Month')
+    plt.xlabel("Month")
+    plt.ylabel("Crashes")
+    plt.savefig("crashesByMonth.png")
+
+def generateCrashsByTimeOfDay():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            sum(num_killed) as sum,
+            count(*) as count,
+            strftime("%H", time) hour
+        FROM collisions
+        GROUP BY strftime("%H", time)
+        ''',
+        conn)
+
+
+
+    df.plot()
+    plt.title('Crashes By Time Of Day')
+    plt.xlabel("Time")
+    plt.ylabel("Crashes")
+    plt.savefig("crashesByTimeOfDay.png")
+
+
+def generateDeathsByMonth():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            sum(num_killed) as sum,
+            strftime("%m", date) as 'month' 
+        FROM collisions
+        GROUP BY strftime("%m", date)
+        ''',
+    conn)
+
+    df.plot()
+    plt.title('Traffic Deaths By Month')
+    plt.xlabel("Month")
+    plt.ylabel("Deaths")
+    plt.savefig("deathsByMonth.png")
+
 
 if __name__ == '__main__':
-    setup();
+#    setup()
+    generateCrashsByMonth()
+    generateDeathsByMonth()
+    generateCrashsByTimeOfDay()
