@@ -119,6 +119,7 @@ def generateCrashsByTimeOfDay():
         ''',
         conn)
 
+
     df.plot()
     plt.title('Crashes By Time Of Day')
     plt.xlabel("Time")
