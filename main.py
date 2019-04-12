@@ -19,6 +19,7 @@ def setup():
     exists = os.path.isfile('data/NYPD_Motor_Vehicle_Collisions.csv')
     if not exists:
         print "Unzipping collision data..."
+
         tar = tarfile.open("data/NYPD_Motor_Vehicle_Collisions.csv.tar.gz")
         tar.extractall('data/')
         tar.close()
@@ -124,6 +125,7 @@ def generateCrashsByTimeOfDay():
     plt.title('Crashes By Time Of Day')
     plt.xlabel("Time")
     plt.ylabel("Crashes")
+
     plt.savefig("crashesByTimeOfDay.png")
 
 
