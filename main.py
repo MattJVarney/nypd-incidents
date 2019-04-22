@@ -16,7 +16,7 @@ from dateutil import parser
 # It creates a SQL lite database with data/
 # It creates a table called `collisions` and it imports the data
 def setup():
-    exists = os.path.isfile('data/NYPD_Motor_Vehicle_Collisions.csv')
+    exists = os.path.isfile("C:/Users/Becky/Documents/nypd-traffic-incidents/data/sqllite/collision.db")
     if not exists:
         print "Unzipping collision data..."
 
@@ -24,73 +24,72 @@ def setup():
         tar.extractall('data/')
         tar.close()
 
-    conn = sqlite3.connect('data/sqllite/collision.db')
-    c = conn.cursor()
+        c = conn.cursor()
 
-    c.execute(''' DROP TABLE IF EXISTS collisions''')
-    # Create table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS collisions (
-            date date,
-            time text,
-            borough text,
-            zip int,
-            latitude real ,
-            longitude real ,
-            location text,
-            on_street_name text,
-            off_street_name text,
-            cross_street_name text,
-            num_injured int,
-            num_killed int,
-            num_ped_injured int,
-            num_ped_killed text,
-            num_cycle_injured text,
-            num_cycle_killed text,
-            num_motor_injured text,
-            num_motor_killed text,
-            contributing_factor_veh_1 text,
-            contributing_factor_veh_2 text,
-            contributing_factor_veh_3 text,
-            contributing_factor_veh_4 text,
-            contributing_factor_veh_5 text,
-            unique_key int,
-            veh_type_code_1 text,
-            veh_type_code_2 text,
-            veh_type_code_3 text,
-            veh_type_code_4 text,
-            veh_type_code_5 text
-        )
-    ''')
+        c.execute(''' DROP TABLE IF EXISTS collisions''')
+        # Create table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS collisions (
+                date date,
+                time text,
+                borough text,
+                zip int,
+                latitude real ,
+                longitude real ,
+                location text,
+                on_street_name text,
+                off_street_name text,
+                cross_street_name text,
+                num_injured int,
+                num_killed int,
+                num_ped_injured int,
+                num_ped_killed text,
+                num_cycle_injured text,
+                num_cycle_killed text,
+                num_motor_injured text,
+                num_motor_killed text,
+                contributing_factor_veh_1 text,
+                contributing_factor_veh_2 text,
+                contributing_factor_veh_3 text,
+                contributing_factor_veh_4 text,
+                contributing_factor_veh_5 text,
+                unique_key int,
+                veh_type_code_1 text,
+                veh_type_code_2 text,
+                veh_type_code_3 text,
+                veh_type_code_4 text,
+                veh_type_code_5 text
+            )
+        ''')
 
 
-    print "PROCESSING CSV INTO SQL LITE"
+        print "PROCESSING CSV INTO SQL LITE"
 
-    with open('data/NYPD_Motor_Vehicle_Collisions.csv') as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        count = 0;
-        for row in readCSV:
-            count += 1
-            if (count == 1):
-                continue
+        with open('data/NYPD_Motor_Vehicle_Collisions.csv') as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=',')
+            count = 0;
+            for row in readCSV:
+                count += 1
+                if (count == 1):
+                    continue
 
-            #normalizes the data
-            dt = parser.parse(row[0])
-            row[0] = dt.strftime('%Y-%m-%d')
+                #normalizes the data
+                dt = parser.parse(row[0])
+                row[0] = dt.strftime('%Y-%m-%d')
 
-            # normalizes the time
-            dt = parser.parse(row[1]);
-            row[1] = dt.strftime('%H:%M')
+                # normalizes the time
+                dt = parser.parse(row[1]);
+                row[1] = dt.strftime('%H:%M')
 
-            c.execute("INSERT INTO collisions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                      "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
-            if (count % 10000 == 0):
-                print "processed " + str(count) + " records (out of 1.45M)"
-                conn.commit()
-    conn.commit()
-
-    conn.close()
-
+                c.execute("INSERT INTO collisions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+                          "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", row)
+                if (count % 10000 == 0):
+                    print "processed " + str(count) + " records (out of 1.45M)"
+                    conn.commit()
+    else:
+        conn = sqlite3.connect('C:/Users/Becky/Documents/nypd-traffic-incidents/data/sqllite/collision.db')
+        conn.commit()
+        conn.close()
 def generateCrashsByMonth():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
@@ -108,6 +107,32 @@ def generateCrashsByMonth():
     plt.ylabel("Crashes")
     plt.savefig("crashesByMonth.png")
 
+
+def generateCrashByBorough():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+        '''SELECT borough, COUNT(borough) as frequency
+        FROM collisions
+        GROUP BY borough
+        ORDER BY COUNT(*) ASC;
+        ''',
+        conn)
+    hist = myQ.plot.bar(x = 'borough', y = 'frequency', rot = 0)
+    plt.title('Crashes By Burough')
+    plt.xlabel('Borough')
+    plt.ylabel('Total of Crashes')
+    plt.savefig('crashesByBoroughBar')
+def scatterNYC():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+    '''
+    SELECT CAST(latitude AS NUMERIC) AS lat, CAST(longitude AS NUMERIC) AS long
+    FROM collisions
+    WHERE lat > 40
+    '''
+    , conn)
+    scatter = myQ.plot.scatter(x = 'long', y = 'lat')
+    plt.savefig('crashesByLatLong')
 def generateCrashsByTimeOfDay():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
@@ -152,3 +177,5 @@ if __name__ == '__main__':
     generateCrashsByMonth()
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
+    generateCrashByBorough()
+    scatterNYC()
