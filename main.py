@@ -175,26 +175,26 @@ def generateCrashesByDayOfWeek():
     plt.ylabel('Percentage')
     plt.savefig('crashesByDayOfWeekBar')
 
-def generateCrashesWithDeathsByContributingFactor:
-    conn = sqlite3.connect('data/sqllite/collision.db')
-    myQ = pd.read_sql_query(
-        '''
-            SELECT 
-                contributing_factor_veh_1,
-                sum(num_motor_killed) deaths
-            FROM collisions
-            GROUP by strftime('%w', date);
-        ''',
-        conn)
-
-    bars = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
-
-    hist = myQ.plot.bar(x = 'day', y = 'perc', rot = 0)
-    plt.xticks([0,1,2,3,4,5,6], bars, color='black')
-    plt.title('Crashes By Day Of Week')
-    plt.xlabel('Day')
-    plt.ylabel('Percentage')
-    plt.savefig('crashesByDayOfWeekBar')
+# def generateCrashesWithDeathsByContributingFactor():
+#     conn = sqlite3.connect('data/sqllite/collision.db')
+#     myQ = pd.read_sql_query(
+#         '''
+#             SELECT
+#                 contributing_factor_veh_1,
+#                 sum(num_motor_killed) deaths
+#             FROM collisions
+#             GROUP by strftime('%w', date);
+#         ''',
+#         conn)
+#
+#     bars = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+#
+#     hist = myQ.plot.bar(x = 'day', y = 'perc', rot = 0)
+#     plt.xticks([0,1,2,3,4,5,6], bars, color='black')
+#     plt.title('Crashes By Day Of Week')
+#     plt.xlabel('Day')
+#     plt.ylabel('Percentage')
+#     plt.savefig('crashesByDayOfWeekBar')
 
 
 def generateAlcoholCrashesByDayOfWeek():
