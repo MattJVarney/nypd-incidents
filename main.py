@@ -16,7 +16,7 @@ from dateutil import parser
 # It creates a SQL lite database with data/
 # It creates a table called `collisions` and it imports the data
 def setup():
-    exists = os.path.isfile("C:/Users/Becky/Documents/nypd-traffic-incidents/data/sqllite/collision.db")
+    exists = os.path.isfile("data/sqllite/collision.db")
     if not exists:
         print "Unzipping collision data..."
 
@@ -87,7 +87,7 @@ def setup():
                     print "processed " + str(count) + " records (out of 1.45M)"
                     conn.commit()
     else:
-        conn = sqlite3.connect('C:/Users/Becky/Documents/nypd-traffic-incidents/data/sqllite/collision.db')
+        conn = sqlite3.connect('data/sqllite/collision.db')
         conn.commit()
         conn.close()
 def generateCrashsByMonth():
@@ -122,6 +122,7 @@ def generateCrashByBorough():
     plt.xlabel('Borough')
     plt.ylabel('Total of Crashes')
     plt.savefig('crashesByBoroughBar')
+
 def scatterNYC():
     conn = sqlite3.connect('data/sqllite/collision.db')
     myQ = pd.read_sql_query(
@@ -133,6 +134,7 @@ def scatterNYC():
     , conn)
     scatter = myQ.plot.scatter(x = 'long', y = 'lat')
     plt.savefig('crashesByLatLong')
+
 def generateCrashsByTimeOfDay():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
@@ -145,13 +147,77 @@ def generateCrashsByTimeOfDay():
         ''',
         conn)
 
-
     df.plot()
     plt.title('Crashes By Time Of Day')
     plt.xlabel("Time")
     plt.ylabel("Crashes")
 
     plt.savefig("crashesByTimeOfDay.png")
+
+def generateCrashesByDayOfWeek():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+        '''
+            SELECT 
+                strftime('%w', date) day,
+                round(count(*) / (SELECT cast (COUNT(*) as real) FROM collisions) * 100, 1) perc
+            FROM collisions
+            GROUP by strftime('%w', date);
+        ''',
+        conn)
+
+    bars = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+
+    hist = myQ.plot.bar(x = 'day', y = 'perc', rot = 0)
+    plt.xticks([0,1,2,3,4,5,6], bars, color='black')
+    plt.title('Crashes By Day Of Week')
+    plt.xlabel('Day')
+    plt.ylabel('Percentage')
+    plt.savefig('crashesByDayOfWeekBar')
+
+def generateCrashesWithDeathsByContributingFactor:
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+        '''
+            SELECT 
+                contributing_factor_veh_1,
+                sum(num_motor_killed) deaths
+            FROM collisions
+            GROUP by strftime('%w', date);
+        ''',
+        conn)
+
+    bars = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+
+    hist = myQ.plot.bar(x = 'day', y = 'perc', rot = 0)
+    plt.xticks([0,1,2,3,4,5,6], bars, color='black')
+    plt.title('Crashes By Day Of Week')
+    plt.xlabel('Day')
+    plt.ylabel('Percentage')
+    plt.savefig('crashesByDayOfWeekBar')
+
+
+def generateAlcoholCrashesByDayOfWeek():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+        '''
+            SELECT 
+                strftime('%w', date) day,
+                round(count(*) / (SELECT cast (COUNT(*) as real) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement') * 100, 1) perc
+            FROM collisions
+            WHERE contributing_factor_veh_1 = 'Alcohol Involvement'
+            GROUP by strftime('%w', date);
+        ''',
+        conn)
+
+    bars = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+
+    hist = myQ.plot.bar(x='day', y='perc', rot=0)
+    plt.xticks([0, 1, 2, 3, 4, 5, 6], bars, color='black')
+    plt.title('Alcohol Crashes By Day Of Week')
+    plt.xlabel('Day')
+    plt.ylabel('Percentage')
+    plt.savefig('alcoholCrashesByDayOfWeekBar')
 
 
 def generateDeathsByMonth():
@@ -174,6 +240,8 @@ def generateDeathsByMonth():
 
 if __name__ == '__main__':
     setup()
+    generateAlcoholCrashesByDayOfWeek()
+    generateCrashesByDayOfWeek()
     generateCrashsByMonth()
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
