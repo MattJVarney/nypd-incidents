@@ -5,6 +5,7 @@ import os
 import tarfile
 import sqlite3
 import csv
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -175,6 +176,44 @@ def generateCrashesByDayOfWeek():
     plt.ylabel('Percentage')
     plt.savefig('crashesByDayOfWeekBar')
 
+def generateCrashesByFactorPie():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            count(*) as count,
+            contributing_factor_veh_1 
+        FROM collisions
+        GROUP BY contributing_factor_veh_1
+        HAVING count > 24000
+        ORDER BY count DESC
+        ''',
+        conn)
+
+
+    # Data to plot
+    plt.pie(
+        # using data total arrests
+        df['count'],
+        # with the labels being officer names
+        labels=df['contributing_factor_veh_1'],
+        # with no shadows
+        shadow=False,
+        # with the start angle at 90%
+        startangle=60,
+        # with the percent listed as a fraction
+        autopct='%1.1f%%',
+        # rotatelabels=1,
+        labeldistance=1.1,
+        radius=3,
+        textprops={'fontsize': 10}
+    )
+
+    # View the plot drop above
+    plt.axis('equal')
+    plt.subplots_adjust(left=.3, right=.7)
+    plt.title('Crash Contributing Factors')
+    plt.savefig('crashesByContributingFactorPie', dpi=300)
+
 # def generateCrashesWithDeathsByContributingFactor():
 #     conn = sqlite3.connect('data/sqllite/collision.db')
 #     myQ = pd.read_sql_query(
@@ -240,6 +279,7 @@ def generateDeathsByMonth():
 
 if __name__ == '__main__':
     setup()
+    generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
     generateCrashesByDayOfWeek()
     generateCrashsByMonth()
