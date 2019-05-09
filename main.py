@@ -106,7 +106,7 @@ def generateCrashesByMonth():
     plt.title('Crashes By Month')
     plt.xlabel("Month")
     plt.ylabel("Crashes")
-    plt.savefig("crashesByMonth.png")
+    plt.savefig("charts/crashesByMonth.png")
 
 
 def generateCrashByBorough():
@@ -122,7 +122,7 @@ def generateCrashByBorough():
     plt.title('Crashes By Burough')
     plt.xlabel('Borough')
     plt.ylabel('Total of Crashes')
-    plt.savefig('crashesByBoroughBar')
+    plt.savefig('charts/crashesByBoroughBar')
 
 def scatterNYC():
     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -134,7 +134,7 @@ def scatterNYC():
     '''
     , conn)
     scatter = myQ.plot.scatter(x = 'long', y = 'lat')
-    plt.savefig('crashesByLatLong')
+    plt.savefig('charts/crashesByLatLong')
 
 def generateCrashsByTimeOfDay():
     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -153,7 +153,7 @@ def generateCrashsByTimeOfDay():
     plt.xlabel("Time")
     plt.ylabel("Crashes")
 
-    plt.savefig("crashesByTimeOfDay.png")
+    plt.savefig("charts/crashesByTimeOfDay.png")
 
 def generateCrashesByDayOfWeek():
     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -174,7 +174,7 @@ def generateCrashesByDayOfWeek():
     plt.title('Crashes By Day Of Week')
     plt.xlabel('Day')
     plt.ylabel('Percentage')
-    plt.savefig('crashesByDayOfWeekBar')
+    plt.savefig('charts/crashesByDayOfWeekBar')
 
 def generateCrashesByFactorPie():
     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -212,7 +212,7 @@ def generateCrashesByFactorPie():
     plt.axis('equal')
     plt.subplots_adjust(left=.3, right=.7)
     plt.title('Crash Contributing Factors')
-    plt.savefig('crashesByContributingFactorPie', dpi=300)
+    plt.savefig('charts/crashesByContributingFactorPie', dpi=300)
 
 # def generateCrashesWithDeathsByContributingFactor():
 #     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -233,7 +233,7 @@ def generateCrashesByFactorPie():
 #     plt.title('Crashes By Day Of Week')
 #     plt.xlabel('Day')
 #     plt.ylabel('Percentage')
-#     plt.savefig('crashesByDayOfWeekBar')
+#     plt.savefig('charts/crashesByDayOfWeekBar')
 
 
 def generateAlcoholCrashesByDayOfWeek():
@@ -256,7 +256,7 @@ def generateAlcoholCrashesByDayOfWeek():
     plt.title('Alcohol Crashes By Day Of Week')
     plt.xlabel('Day')
     plt.ylabel('Percentage')
-    plt.savefig('alcoholCrashesByDayOfWeekBar')
+    plt.savefig('charts/alcoholCrashesByDayOfWeekBar')
 
 
 def generateDeathsByMonth():
@@ -274,7 +274,7 @@ def generateDeathsByMonth():
     plt.title('Traffic Deaths By Month')
     plt.xlabel("Month")
     plt.ylabel("Deaths")
-    plt.savefig("deathsByMonth.png")
+    plt.savefig("charts/deathsByMonth.png")
 
 
 if __name__ == '__main__':
