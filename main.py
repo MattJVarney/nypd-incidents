@@ -91,7 +91,7 @@ def setup():
         conn = sqlite3.connect('data/sqllite/collision.db')
         conn.commit()
         conn.close()
-def generateCrashsByMonth():
+def generateCrashesByMonth():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
         '''SELECT
@@ -282,7 +282,7 @@ if __name__ == '__main__':
     generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
     generateCrashesByDayOfWeek()
-    generateCrashsByMonth()
+    generateCrashesByMonth()
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
     generateCrashByBorough()
