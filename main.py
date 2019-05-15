@@ -374,6 +374,23 @@ def printAverages():
     print df
     print "---\n"
 
+    df = pd.read_sql_query(
+        '''SELECT
+            count(*) as crash_count,
+            count(*)/365/6 as crash_daily_avg,
+            SUM(num_killed) sum_killed,
+            SUM(num_injured) sum_injured
+        FROM collisions
+        WHERE strftime("%Y", date) != '2012'
+            AND strftime("%Y", date) != '2019'
+        ''',
+        conn)
+
+    print "---"
+    print "PRINTING SUMMARY"
+    print df
+    print "---\n"
+
 
 if __name__ == '__main__':
     setup()
