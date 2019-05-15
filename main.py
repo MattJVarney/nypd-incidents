@@ -353,9 +353,31 @@ def generateDeathsByMonth():
     plt.ylabel("Deaths")
     plt.savefig("charts/deathsByMonth.png")
 
+def printAverages():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            strftime("%Y", date) as year,
+            count(*) as crash_count,
+            count(*)/365 as crash_daily_avg,
+            SUM(num_killed) sum_killed,
+            SUM(num_injured) sum_injured
+        FROM collisions
+        WHERE strftime("%Y", date) != '2012'
+            AND strftime("%Y", date) != '2019'
+        GROUP BY strftime("%Y", date)
+        ''',
+    conn)
+
+    print "---"
+    print "PRINTING YEARLY AVERAGES"
+    print df
+    print "---\n"
+
 
 if __name__ == '__main__':
     setup()
+    printAverages()
     scatterNYC()
     heatmapNYC()
     generateCrashesByFactorPie()
