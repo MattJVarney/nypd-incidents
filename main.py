@@ -159,6 +159,7 @@ def heatmapNYC():
     plt.clf()
     plt.imshow(heatmap.T, extent=extent, origin='lower')
     plt.savefig('charts/crashesByLatLongHeatmap')
+
 def scatterNYC():
     conn = sqlite3.connect('data/sqllite/collision.db')
     myQ = pd.read_sql_query(
@@ -314,6 +315,7 @@ def generateAlcoholCrashesByHour():
     plt.xlabel('Hour')
     plt.ylabel('Percentage')
     plt.savefig('charts/alcoholCrashesByHourBar')
+
 def generateAlcoholCrashesByDayOfWeekTimeShifted():
     conn = sqlite3.connect('data/sqllite/collision.db')
     myQ = pd.read_sql_query(
@@ -390,10 +392,27 @@ def printAverages():
     print df
     print "---\n"
 
+def printBoroughCounts():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            borough,
+            count(*) as count
+        FROM collisions
+        GROUP BY borough
+        ''',
+    conn)
+
+    print "---"
+    print "PRINTING BOROUGH TALLY"
+    print df
+    print "---\n"
+
 
 if __name__ == '__main__':
     setup()
     printAverages()
+    printBoroughCounts()
     scatterNYC()
     heatmapNYC()
     generateCrashesByFactorPie()
@@ -406,3 +425,6 @@ if __name__ == '__main__':
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
     generateCrashByBorough()
+
+
+    # add cell crashes over time
