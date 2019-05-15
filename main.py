@@ -166,10 +166,13 @@ def scatterNYC():
     SELECT CAST(latitude AS NUMERIC) AS lat, CAST(longitude AS NUMERIC) AS long
     FROM collisions
     WHERE lat > 40
+        AND lat < 41
+        AND long > -74.4
+        AND long < -73
     '''
     , conn)
     scatter = myQ.plot.scatter(x = 'long', y = 'lat')
-    plt.savefig('charts/crashesByLatLong')
+    plt.savefig('charts/crashesByLatLongPlot')
 
 def generateCrashsByTimeOfDay():
     conn = sqlite3.connect('data/sqllite/collision.db')
