@@ -108,6 +108,23 @@ def generateCrashesByMonth():
     plt.ylabel("Crashes")
     plt.savefig("charts/crashesByMonth.png")
 
+def generateCrashesByYear():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            count(*) as count,
+            strftime("%J", date) - 2456108.5 as day
+        FROM collisions
+        GROUP BY strftime("%J", date) - 2456108.5
+        ''',
+    conn)
+
+    df.plot()
+    plt.title('Crashes Over Time')
+    plt.xlabel("Day")
+    plt.ylabel("Crashes")
+    plt.savefig("charts/crashesOverTime.png")
+
 
 def generateCrashByBorough():
     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -283,6 +300,7 @@ if __name__ == '__main__':
     generateAlcoholCrashesByDayOfWeek()
     generateCrashesByDayOfWeek()
     generateCrashesByMonth()
+    generateCrashesByYear()
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
     generateCrashByBorough()
