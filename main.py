@@ -376,10 +376,9 @@ def printAverages():
 
     df = pd.read_sql_query(
         '''SELECT
-            count(*) as crash_count,
             count(*)/365/6 as crash_daily_avg,
-            SUM(num_killed) sum_killed,
-            SUM(num_injured) sum_injured
+            SUM(num_killed)/365/6 killed_daily_avg,
+            SUM(num_injured)/365/6 injured_daily_avg
         FROM collisions
         WHERE strftime("%Y", date) != '2012'
             AND strftime("%Y", date) != '2019'
