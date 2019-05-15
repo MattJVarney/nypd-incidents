@@ -296,6 +296,45 @@ def generateAlcoholCrashesByDayOfWeek():
     plt.ylabel('Percentage')
     plt.savefig('charts/alcoholCrashesByDayOfWeekBar')
 
+def generateAlcoholCrashesByHour():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+        '''
+            SELECT 
+                strftime("%H", time) hour,
+                round(count(*) / (SELECT cast (COUNT(*) as real) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement') * 100, 1) perc
+            FROM collisions
+            WHERE contributing_factor_veh_1 = 'Alcohol Involvement'
+            GROUP by strftime("%H", time);
+        ''',
+        conn)
+
+    hist = myQ.plot.bar(x='hour', y='perc', rot=0)
+    plt.title('Alcohol Crashes By Hour of Day')
+    plt.xlabel('Hour')
+    plt.ylabel('Percentage')
+    plt.savefig('charts/alcoholCrashesByHourBar')
+def generateAlcoholCrashesByDayOfWeekTimeShifted():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    myQ = pd.read_sql_query(
+        '''
+            SELECT 
+                strftime('%w', DATE(date, '-10 hour')) day,
+                round(count(*) / (SELECT cast (COUNT(*) as real) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement') * 100, 1) perc
+            FROM collisions
+            WHERE contributing_factor_veh_1 = 'Alcohol Involvement'
+            GROUP by strftime('%w', DATE(date, '-10 hour'));
+        ''',
+        conn)
+
+    bars = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+
+    hist = myQ.plot.bar(x='day', y='perc', rot=0)
+    plt.xticks([0, 1, 2, 3, 4, 5, 6], bars, color='black')
+    plt.title('Alcohol Crashes By Day Of Week Time Shifted')
+    plt.xlabel('Day')
+    plt.ylabel('Percentage')
+    plt.savefig('charts/alcoholCrashesByDayOfWeekTimeShiftedBar')
 
 def generateDeathsByMonth():
     conn = sqlite3.connect('data/sqllite/collision.db')
@@ -321,6 +360,8 @@ if __name__ == '__main__':
     heatmapNYC()
     generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
+    generateAlcoholCrashesByHour()
+    generateAlcoholCrashesByDayOfWeekTimeShifted()
     generateCrashesByDayOfWeek()
     generateCrashesByMonth()
     generateCrashesByYear()
