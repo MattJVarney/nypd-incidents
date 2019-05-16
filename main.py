@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ## Matthew Varney
 # NYPD Traffic Data
 
@@ -25,6 +27,7 @@ def setup():
         tar.extractall('data/')
         tar.close()
 
+        conn = sqlite3.connect('data/sqllite/collision.db')
         c = conn.cursor()
 
         c.execute(''' DROP TABLE IF EXISTS collisions''')
@@ -91,6 +94,41 @@ def setup():
         conn = sqlite3.connect('data/sqllite/collision.db')
         conn.commit()
         conn.close()
+
+def printInjuryRateOfAlcoholVsNonAlcohol():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''
+        SELECT
+            alcohol_total,
+            non_alcohol_total,
+            alcohol_injuries,
+            non_alcohol_injuries,
+            alcohol_injuries * 1.0 / alcohol_total as al_inj_rate,
+            non_alcohol_injuries * 1.0 / non_alcohol_total as non_al_inj_rate,
+            alcohol_killed,
+            non_alcohol_killed,
+            alcohol_killed * 1.0 / alcohol_total as al_killed_rate,
+            non_alcohol_killed * 1.0 / non_alcohol_total as non_al_killed_rate
+        FROM (
+            SELECT
+                (SELECT count(1) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement' AND num_injured > 0) as alcohol_injuries,
+                (SELECT count(1) FROM collisions WHERE contributing_factor_veh_1 != 'Alcohol Involvement' AND num_injured > 0) as non_alcohol_injuries,
+                (SELECT count(1) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement' AND num_killed > 0) as alcohol_killed,
+                (SELECT count(1) FROM collisions WHERE contributing_factor_veh_1 != 'Alcohol Involvement' AND num_killed > 0) as non_alcohol_killed,
+                (SELECT count(1) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement') as alcohol_total,
+                (SELECT count(1) FROM collisions WHERE contributing_factor_veh_1 != 'Alcohol Involvement') as non_alcohol_total
+            FROM collisions
+            LIMIT 1
+        )
+        ''',
+        conn)
+
+    print "---"
+    print "PRINTING ALCOHOL INJURY RATES"
+    print df
+    print "---\n"
+
 def generateCrashesByMonth():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
@@ -325,7 +363,7 @@ def generateAlcoholCrashesByDayOfWeekTimeShifted():
                 round(count(*) / (SELECT cast (COUNT(*) as real) FROM collisions WHERE contributing_factor_veh_1 = 'Alcohol Involvement') * 100, 1) perc
             FROM collisions
             WHERE contributing_factor_veh_1 = 'Alcohol Involvement'
-            GROUP by strftime('%w', DATE(date, '-10 hour'));
+            GROUP by strftime('%w', DATE(date, '-7 hour'));
         ''',
         conn)
 
@@ -413,8 +451,7 @@ if __name__ == '__main__':
     setup()
     printAverages()
     printBoroughCounts()
-    scatterNYC()
-    heatmapNYC()
+    printInjuryRateOfAlcoholVsNonAlcohol()
     generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
     generateAlcoholCrashesByHour()
@@ -425,6 +462,8 @@ if __name__ == '__main__':
     generateDeathsByMonth()
     generateCrashsByTimeOfDay()
     generateCrashByBorough()
+    scatterNYC()
+    heatmapNYC()
 
 
     # add cell crashes over time
