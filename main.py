@@ -198,6 +198,25 @@ def heatmapNYC():
     plt.imshow(heatmap.T, extent=extent, origin='lower')
     plt.savefig('charts/crashesByLatLongHeatmap')
 
+def smallheatmapNYC():
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''
+        SELECT CAST(latitude AS NUMERIC) AS lat, CAST(longitude AS NUMERIC) AS long
+        FROM collisions
+        WHERE lat > 40.74
+        AND lat < 40.78
+        AND long > -74
+        AND long < -73.96
+        '''
+        , conn)
+
+    heatmap, xedges, yedges = np.histogram2d(df.long, df.lat, bins=50)
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    plt.clf()
+    plt.imshow(heatmap.T, extent=extent, origin='lower')
+    plt.savefig('charts/crashesByLatLongSmallHeatmap')
+
 def scatterNYC():
     conn = sqlite3.connect('data/sqllite/collision.db')
     myQ = pd.read_sql_query(
@@ -452,6 +471,7 @@ if __name__ == '__main__':
     printAverages()
     printBoroughCounts()
     printInjuryRateOfAlcoholVsNonAlcohol()
+    smallheatmapNYC()
     generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
     generateAlcoholCrashesByHour()
