@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import Orange
+from pandas import DataFrame
+from sklearn.cluster import KMeans
 
 from dateutil import parser
 
@@ -490,9 +492,40 @@ def printBoroughCounts():
     print df
     print "---\n"
 
+def kmeansCluster():
+
+    conn = sqlite3.connect('data/sqllite/collision.db')
+    df = pd.read_sql_query(
+        '''SELECT
+            latitude * 1.0 as lat,
+            longitude * 1.0 as long
+        FROM collisions
+        WHERE latitude > 40.0
+        AND latitude < 41.0
+        AND longitude > -74.4
+        AND longitude < -73.0
+        AND longitude != ''
+        AND latitude != ''
+        order by long
+        ''',
+    conn)
+
+    kmeans = KMeans(n_clusters=5).fit(df)
+    centroids = kmeans.cluster_centers_
+
+    plt.scatter(df['long'], df['lat'], c=kmeans.labels_.astype(float), s=50, alpha=0.5)
+    plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=50)
+    plt.xlim(-74.3, -73.6)
+    plt.ylim(40.4, 41.0)
+
+    plt.title('Cluster Mapping with KMeans')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.savefig("charts/kmeansCluster.png")
 
 if __name__ == '__main__':
     setup()
+    kmeansCluster()
     printAverages()
     printBoroughCounts()
     printInjuryRateOfAlcoholVsNonAlcohol()
