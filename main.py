@@ -10,6 +10,7 @@ import csv
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import Orange
 
 from dateutil import parser
 
@@ -129,6 +130,30 @@ def printInjuryRateOfAlcoholVsNonAlcohol():
     print df
     print "---\n"
 
+def printCausesAssociationRules():
+    f = open('data/data.basket', 'a+')
+
+    conn = sqlite3.connect('data/sqllite/collision.db')
+
+    myQ = pd.read_sql_query(
+        '''
+        SELECT contributing_factor_veh_1 ,contributing_factor_veh_2
+        FROM collisions
+        WHERE contributing_factor_veh_2 != "Unspecified" AND contributing_factor_veh_1 != "Unspecified" AND
+            contributing_factor_veh_2 IS NOT NULL AND contributing_factor_veh_1 IS NOT NULL
+        '''
+        , conn)
+    for reas in myQ.itertuples():
+        f.write(str(reas.contributing_factor_veh_1)+', '+str(reas.contributing_factor_veh_2)+'\n')
+    data = Orange.data.Table("data/data.basket")
+    rules = Orange.associate.AssociationRulesSparseInducer(data, support=0.01)
+
+    print "---"
+    print "PRINTING Cause 1 -> Cause 2 Association Rules"
+    print "%5s %5s  %s" % ("Supp", "Conf", "Rule")
+    for r in rules[:5]:
+        print "%4.3f %4.3f  %s" % (r.support, r.confidence, r)
+    print "---\n"
 def generateCrashesByMonth():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
@@ -471,6 +496,7 @@ if __name__ == '__main__':
     printAverages()
     printBoroughCounts()
     printInjuryRateOfAlcoholVsNonAlcohol()
+    printCausesAssociationRules()
     smallheatmapNYC()
     generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
