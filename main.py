@@ -153,9 +153,38 @@ def printCausesAssociationRules():
     print "---"
     print "PRINTING Cause 1 -> Cause 2 Association Rules"
     print "%5s %5s  %s" % ("Supp", "Conf", "Rule")
+
+    rules = sorted(rules, key=lambda k: k.support, reverse=True)
     for r in rules[:5]:
         print "%4.3f %4.3f  %s" % (r.support, r.confidence, r)
     print "---\n"
+
+def printCauseVehicleAssociationRules():
+    f = open('data/data2.basket', 'a+')
+
+    conn = sqlite3.connect('data/sqllite/collision.db')
+
+    myQ = pd.read_sql_query(
+        '''
+        SELECT contributing_factor_veh_1, veh_type_code_1
+        FROM collisions
+        WHERE contributing_factor_veh_1 != "Unspecified"
+        '''
+        , conn)
+    for reas in myQ.itertuples():
+        f.write(str(reas.contributing_factor_veh_1) + ', ' + str(reas.veh_type_code_1) + '\n')
+    data = Orange.data.Table("data/data2.basket")
+    rules = Orange.associate.AssociationRulesSparseInducer(data, support=0.01)
+
+    print "---"
+    print "PRINTING Cause 1 -> Vehicle Type"
+    print "%5s %5s  %s" % ("Supp", "Conf", "Rule")
+    rules = sorted(rules, key=lambda k: k.support, reverse=True)
+    for r in rules[:10]:
+        print "%4.3f %4.3f  %s" % (r.support, r.confidence, r)
+    print "---\n"
+
+
 def generateCrashesByMonth():
     conn = sqlite3.connect('data/sqllite/collision.db')
     df = pd.read_sql_query(
@@ -530,6 +559,7 @@ if __name__ == '__main__':
     printBoroughCounts()
     printInjuryRateOfAlcoholVsNonAlcohol()
     printCausesAssociationRules()
+    printCauseVehicleAssociationRules()
     smallheatmapNYC()
     generateCrashesByFactorPie()
     generateAlcoholCrashesByDayOfWeek()
