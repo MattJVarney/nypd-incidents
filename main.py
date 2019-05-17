@@ -542,7 +542,7 @@ def kmeansCluster():
     kmeans = KMeans(n_clusters=5).fit(df)
     centroids = kmeans.cluster_centers_
 
-    plt.scatter(df['long'], df['lat'], c=kmeans.labels_.astype(float), s=50, alpha=0.5)
+    plt.scatter(df['long'], df['lat'], c=kmeans.labels_.astype(float), s=1, alpha=0.5)
     plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=50)
     plt.xlim(-74.3, -73.6)
     plt.ylim(40.4, 41.0)
